@@ -34,28 +34,32 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const userCollection = client.db("myTask").collection("users");
-    const tasksCollection = client.db("myTask").collection("tasks");
+    const taskMateUserCollection = client
+      .db("myTask")
+      .collection("taskMateUsers");
+    const taskMateTasksCollection = client
+      .db("myTask")
+      .collection("taskMateTasks");
 
     // Task collection
-    app.get("/tasks", async (req, res) => {
-      const result = await tasksCollection.find().toArray();
+    app.get("/taskMate/tasks", async (req, res) => {
+      const result = await taskMateTasksCollection.find().toArray();
       res.send(result);
     });
-    app.post("/tasks", async (req, res) => {
+    app.post("/taskMate/tasks", async (req, res) => {
       const task = req.body;
-      const result = await tasksCollection.insertOne(task);
+      const result = await taskMateTasksCollection.insertOne(task);
       res.send(result);
     });
 
     //User data collection
-    app.get("/users", async (req, res) => {
-      const result = await userCollection.find().toArray();
+    app.get("/taskMate/users", async (req, res) => {
+      const result = await taskMateUserCollection.find().toArray();
       res.send(result);
     });
-    app.post("/users", async (req, res) => {
+    app.post("/taskMate/users", async (req, res) => {
       const user = req.body;
-      const result = await userCollection.insertOne(user);
+      const result = await taskMateUserCollection.insertOne(user);
       res.send(result);
     });
 
