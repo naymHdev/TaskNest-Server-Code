@@ -2,9 +2,14 @@
   "name": "Taskmate-server",
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "build": "babel src -d lib",
+    "test": "jest"
+  },
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mongodb": "^6.5.0",
     "nodemon": "^3.1.0"
