@@ -42,6 +42,24 @@ async function run() {
       .collection("taskMateTasks");
 
     // Task collection
+    app.put("taskMate/tasks/:id", async (req, res) => {
+      const user = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          assignee: user.assignee,
+        },
+      };
+      const result = await taskMateTasksCollection.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
     app.delete("taskMate/tasks/:id", async (req, res) => {
       const id = req.params.id;
       console.log("delete id----", id);
@@ -55,7 +73,7 @@ async function run() {
       const result = await taskMateTasksCollection.find().toArray();
       res.send(result);
     });
-    
+
     app.post("/taskMate/tasks", async (req, res) => {
       const task = req.body;
       const result = await taskMateTasksCollection.insertOne(task);
