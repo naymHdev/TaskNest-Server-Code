@@ -14,9 +14,6 @@ app.use(
 );
 app.use(express.json());
 
-// diAvs6xqUcUa9uM9
-// taskMate
-
 const uri =
   "mongodb+srv://taskMate:diAvs6xqUcUa9uM9@firstpractice.poejscf.mongodb.net/?retryWrites=true&w=majority&appName=FirstPractice";
 
@@ -32,7 +29,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const taskMateUserCollection = client
       .db("taskMate")
@@ -53,8 +50,9 @@ async function run() {
           status: user.status,
           title: user.title,
           description: user.description,
-          priority: user.description,
+          priority: user.priority,
           team: user.team,
+          time: user.time,
         },
       };
       const result = await taskMateTasksCollection.updateOne(
