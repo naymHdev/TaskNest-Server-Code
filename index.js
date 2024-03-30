@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 // Middle ware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://task-mate-app.netlify.app"],
     credentials: true,
   })
 );
