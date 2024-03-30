@@ -14,11 +14,11 @@ app.use(
 );
 app.use(express.json());
 
-// nBzdf4PLtCE07wco
-// myTask
+// diAvs6xqUcUa9uM9
+// taskMate
 
 const uri =
-  "mongodb+srv://myTask:nBzdf4PLtCE07wco@firstpractice.poejscf.mongodb.net/?retryWrites=true&w=majority&appName=FirstPractice";
+  "mongodb+srv://taskMate:diAvs6xqUcUa9uM9@firstpractice.poejscf.mongodb.net/?retryWrites=true&w=majority&appName=FirstPractice";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -35,14 +35,14 @@ async function run() {
     await client.connect();
 
     const taskMateUserCollection = client
-      .db("myTask")
+      .db("taskMate")
       .collection("taskMateUsers");
     const taskMateTasksCollection = client
-      .db("myTask")
+      .db("taskMate")
       .collection("taskMateTasks");
 
     // Task collection
-    app.put("taskMate/tasks/:id", async (req, res) => {
+    app.put("/taskMate/tasks/:id", async (req, res) => {
       const user = req.body;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -50,6 +50,11 @@ async function run() {
       const updatedDoc = {
         $set: {
           assignee: user.assignee,
+          status: user.status,
+          title: user.title,
+          description: user.description,
+          priority: user.description,
+          team: user.team,
         },
       };
       const result = await taskMateTasksCollection.updateOne(
@@ -60,11 +65,9 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("taskMate/tasks/:id", async (req, res) => {
+    app.delete("/taskMate/tasks/:id", async (req, res) => {
       const id = req.params.id;
-      console.log("delete id----", id);
       const query = { _id: new ObjectId(id) };
-      console.log("delete", query);
       const result = await taskMateTasksCollection.deleteOne(query);
       res.send(result);
     });
@@ -81,6 +84,13 @@ async function run() {
     });
 
     //User data collection
+    app.get("/taskMate/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await taskMateUserCollection.findOne(query);
+      res.send(result);
+    });
+
     app.get("/taskMate/users", async (req, res) => {
       const result = await taskMateUserCollection.find().toArray();
       res.send(result);
