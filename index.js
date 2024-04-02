@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -13,9 +15,26 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
-const uri =
-  "mongodb+srv://taskMate:diAvs6xqUcUa9uM9@firstpractice.poejscf.mongodb.net/?retryWrites=true&w=majority&appName=FirstPractice";
+// Verify with JWT
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies?.token;
+  // console.log(token);
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      console.log(err);
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
+const uri = process.env.DATABASE_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -39,7 +58,7 @@ async function run() {
       .collection("taskMateTasks");
 
     // Task collection
-    app.put("/taskMate/tasks/:id", async (req, res) => {
+    app.put("/taskMate/tasks/:id",  async (req, res) => {
       const user = req.body;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
