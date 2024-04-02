@@ -57,7 +57,7 @@ async function run() {
       .collection("taskMateTasks");
 
     // Task collection
-    app.put("/taskMate/tasks/:id",  async (req, res) => {
+    app.put("/taskMate/tasks/:id", async (req, res) => {
       const user = req.body;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -115,6 +115,36 @@ async function run() {
       const user = req.body;
       const result = await taskMateUserCollection.insertOne(user);
       res.send(result);
+    });
+
+    // Verify JWT with Cookie's
+    app.post("/taskMate/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "30d",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
+
+    //JWT  Logout
+    app.get("/taskMate/logout", async (req, res) => {
+      try {
+        res
+          .clearCookie("token", {
+            maxAge: 0,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+          })
+          .send({ success: true });
+      } catch (err) {
+        res.status(500).send(err);
+      }
     });
 
     // Send a ping to confirm a successful connection
