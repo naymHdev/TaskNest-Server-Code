@@ -1,21 +1,27 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Middle ware
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://task-mate-app.netlify.app"],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: ["http://localhost:5173", "https://task-mate-app.netlify.app"],
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// middlewares
+const logger = (req, res, next) => {
+  console.log("log: info", req.method, req.url);
+  next();
+};
 
 // Verify with JWT
 const verifyToken = async (req, res, next) => {
@@ -88,8 +94,15 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/taskMate/tasks", async (req, res) => {
+    app.get("/taskMate/tasks", verifyToken, async (req, res) => {
       const result = await taskMateTasksCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/taskMate/tasks/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await taskMateTasksCollection.findOne(query);
       res.send(result);
     });
 
@@ -117,34 +130,27 @@ async function run() {
       res.send(result);
     });
 
-    // Verify JWT with Cookie's
-    app.post("/taskMate/jwt", async (req, res) => {
+    // auth related api
+    app.post("/taskMate/jwt", logger, async (req, res) => {
       const user = req.body;
+      console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "30d",
+        expiresIn: "1h",
       });
+
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+          secure: true,
+          sameSite: "none",
         })
         .send({ success: true });
     });
 
-    //JWT  Logout
-    app.get("/taskMate/logout", async (req, res) => {
-      try {
-        res
-          .clearCookie("token", {
-            maxAge: 0,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-          })
-          .send({ success: true });
-      } catch (err) {
-        res.status(500).send(err);
-      }
+    app.post("/taskMate/logout", logger, async (req, res) => {
+      const user = req.body;
+      console.log("logging out", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     // Send a ping to confirm a successful connection
