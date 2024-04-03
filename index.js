@@ -99,10 +99,10 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/taskMate/tasks/:id", verifyToken, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await taskMateTasksCollection.findOne(query);
+    app.get("/taskMate/tasks/:email", async (req, res) => {
+      const query = { email: req.params.email };
+      const result = await taskMateTasksCollection.find(query).toArray();
+      console.log("Result", result);
       res.send(result);
     });
 
@@ -133,7 +133,7 @@ async function run() {
     // auth related api
     app.post("/taskMate/jwt", logger, async (req, res) => {
       const user = req.body;
-      console.log("user for token", user);
+      // console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
@@ -149,7 +149,7 @@ async function run() {
 
     app.post("/taskMate/logout", logger, async (req, res) => {
       const user = req.body;
-      console.log("logging out", user);
+      // console.log("logging out", user);
       res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
