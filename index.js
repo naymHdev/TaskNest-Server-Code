@@ -9,7 +9,11 @@ const port = process.env.PORT || 5000;
 
 // Middle ware
 const corsOptions = {
-  origin: ["http://localhost:5173", "https://task-nest-task.netlify.app"],
+  origin: [
+    "http://localhost:5173",
+    "https://task-nest-task.netlify.app,",
+    "https://task-mate-app.netlify.app",
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -94,7 +98,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/taskMate/tasks", verifyToken, async (req, res) => {
+    app.get("/taskMate/tasks", async (req, res) => {
       const result = await taskMateTasksCollection.find().toArray();
       res.send(result);
     });
